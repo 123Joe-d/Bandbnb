@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  BAND
+  ADMIN
+}
+
+enum BookingStatus {
+  INQUIRY
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  DEPOSIT_PENDING
+  DEPOSIT_PAID
+  REFUNDED
+  FAILED
+}
+
+model User {
+  id               String         @id @default(cuid())
+  name             String
+  email            String         @unique
+  passwordHash     String
+  role             UserRole       @default(CUSTOMER)
+  phone            String?
+  avatarUrl        String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  bandProfile      Band?
+  customerBookings Booking[]      @relation("CustomerBookings")
+  sentMessages     Message[]
+  customerChats    Conversation[] @relation("ConversationCustomer")
+}
+
+model Band {
+  id                  String              @id @default(cuid())
+  ownerId             String              @unique
+  owner               User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  stageName           String
+  slug                String              @unique
+  city                String
+  state               String
+  locationLabel       String
+  priceFrom           Int
+  members             Int
+  shortDescription    String
+  description         String
+  genresCsv           String
+  eventTypesCsv       String
+  imageUrl            String?
+  coverUrl            String?
+  bookingNotice       String?
+  cancellationPolicy  String?
+  serviceRadiusMiles  Int                 @default(25)
+  depositPercentage   Int                 @default(20)
+  isPublished         Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  bookings            Booking[]
+  conversations       Conversation[]
+  availabilityRules   AvailabilityRule[]
+  availabilityBlocks  AvailabilityBlock[]
+}
+
+model AvailabilityRule {
+  id        String   @id @default(cuid())
+  bandId     String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  enabled   Boolean  @default(true)
+  band      Band     @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  @@unique([bandId, dayOfWeek])
+}
+
+model AvailabilityBlock {
+  id        String   @id @default(cuid())
+  bandId     String
+  blockedOn DateTime
+  reason    String?
+  band      Band     @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  @@unique([bandId, blockedOn])
+}
+
+model Booking {
+  id                  String        @id @default(cuid())
+  bandId              String
+  customerId          String
+  band                Band          @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  customer            User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  eventDate           DateTime
+  startTime           String
+  endTime             String
+  eventType           String
+  guestCount          Int
+  location            String
+  notes               String?
+  totalPrice          Int
+  depositAmount       Int           @default(0)
+  status              BookingStatus @default(INQUIRY)
+  paymentStatus       PaymentStatus @default(UNPAID)
+  stripeCheckoutId    String?       @unique
+  stripePaymentIntent String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  bandId       String
+  customerId   String
+  band         Band      @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  customer     User      @relation("ConversationCustomer", fields: [customerId], references: [id], onDelete: Cascade)
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([bandId, customerId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
