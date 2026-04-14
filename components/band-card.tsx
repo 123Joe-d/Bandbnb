@@ -10,30 +10,47 @@ export function BandCard({ band }: { band: Band }) {
     <article className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-card">
       <div className="relative aspect-[4/3] bg-slate-200">
         {band.imageUrl ? (
-          <Image src={band.imageUrl} alt={band.stageName} fill className="object-cover" />
+          <>
+            <Image
+              src={band.imageUrl}
+              alt={band.stageName}
+              fill
+              unoptimized
+              className="object-cover"
+            />
+            <div className="absolute bottom-2 left-2 z-10 rounded bg-black/70 px-2 py-1 text-xs text-white">
+              {band.imageUrl}
+            </div>
+          </>
         ) : (
-          <div className="flex h-full items-center justify-center text-2xl font-semibold text-slate-500">{band.stageName}</div>
+          <div className="flex h-full items-center justify-center text-2xl font-semibold text-slate-500">
+            {band.stageName}
+          </div>
         )}
       </div>
+
       <div className="space-y-3 p-5">
         <div>
           <h3 className="text-xl font-semibold">{band.stageName}</h3>
-          <p className="text-sm text-muted">{band.locationLabel}</p>
+          <p className="text-slate-500">{band.locationLabel}</p>
         </div>
-        <p className="line-clamp-2 text-sm text-muted">{band.shortDescription}</p>
+
+        <p className="text-slate-600">{band.shortDescription}</p>
+
         <div className="flex flex-wrap gap-2">
           {genres.map((genre) => (
-            <span key={genre} className="rounded-full border border-line px-3 py-1 text-xs">
+            <span
+              key={genre}
+              className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600"
+            >
               {genre}
             </span>
           ))}
         </div>
-        <div className="flex items-center justify-between pt-2">
-          <p>
-            <span className="font-semibold">{currency(band.priceFrom)}</span>
-            <span className="text-sm text-muted"> / starting</span>
-          </p>
-          <Link href={`/bands/${band.slug}`} className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white">
+
+        <div className="flex items-center justify-between">
+          <span className="font-semibold">{currency(band.priceFrom)} / starting</span>
+          <Link href={`/bands/${band.slug}`} className="text-sm font-medium text-slate-900 underline">
             View
           </Link>
         </div>
