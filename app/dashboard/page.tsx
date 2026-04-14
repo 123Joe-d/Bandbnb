@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -10,6 +12,7 @@ export default async function DashboardPage() {
   if (user.role === 'BAND') {
     const band = await prisma.band.findUnique({
       where: { ownerId: user.id },
+
       include: {
         bookings: { include: { customer: true }, orderBy: { createdAt: 'desc' } },
         conversations: { include: { customer: true, messages: { orderBy: { createdAt: 'asc' } } }, orderBy: { updatedAt: 'desc' } },
