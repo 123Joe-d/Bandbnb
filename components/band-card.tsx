@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Band } from '@prisma/client';
 import { currency, splitCsv } from '@/lib/utils';
@@ -10,18 +9,11 @@ export function BandCard({ band }: { band: Band }) {
     <article className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-card">
       <div className="relative aspect-[4/3] bg-slate-200">
         {band.imageUrl ? (
-          <>
-            <Image
-              src={band.imageUrl}
-              alt={band.stageName}
-              fill
-              unoptimized
-              className="object-cover"
-            />
-            <div className="absolute bottom-2 left-2 z-10 rounded bg-black/70 px-2 py-1 text-xs text-white">
-              {band.imageUrl}
-            </div>
-          </>
+          <img
+            src={band.imageUrl}
+            alt={band.stageName}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="flex h-full items-center justify-center text-2xl font-semibold text-slate-500">
             {band.stageName}
@@ -50,7 +42,10 @@ export function BandCard({ band }: { band: Band }) {
 
         <div className="flex items-center justify-between">
           <span className="font-semibold">{currency(band.priceFrom)} / starting</span>
-          <Link href={`/bands/${band.slug}`} className="text-sm font-medium text-slate-900 underline">
+          <Link
+            href={`/bands/${band.slug}`}
+            className="text-sm font-medium text-slate-900 underline"
+          >
             View
           </Link>
         </div>
